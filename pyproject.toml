@@ -12,7 +12,7 @@ syndirella = [
 ]
 
 [project]
-name = "syndirella"
+name = "xchem-syndirella"
 version = "5.0.7-alpha"
 authors = [
     { name = "Kate Fieseler", email = "kate.k.fieseler@gmail.com" },
