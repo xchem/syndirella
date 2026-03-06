@@ -32,7 +32,7 @@ dependencies = [
     "glob2",
     "requests",
     "pillow",
-    "fragmenstein>=1.0.7",
+    "xchem-fragmenstein>=1.0.0",
     "shortuuid",
     "pandas",
     "biopython",
