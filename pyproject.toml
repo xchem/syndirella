@@ -12,7 +12,7 @@ syndirella = [
 ]
 
 [project]
-name = "syndirella"
+name = "xchem-syndirella"
 version = "5.0.7-alpha"
 authors = [
     { name = "Kate Fieseler", email = "kate.k.fieseler@gmail.com" },
@@ -32,7 +32,7 @@ dependencies = [
     "glob2",
     "requests",
     "pillow",
-    "fragmenstein>=1.0.7",
+    "xchem-fragmenstein>=1.0.0",
     "shortuuid",
     "pandas",
     "biopython",
