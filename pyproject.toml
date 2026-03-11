@@ -47,7 +47,7 @@ dependencies = [
     "pyrosetta-installer",
 ]
 [project.optional-dependencies]
-hippo = ["hippo-db", "rdkit>=2024.9.6"]
+hippo = ["xchem-hippo", "rdkit>=2024.9.6"]
 
 [project.urls]
 "Documentation" = "https://syndirella.readthedocs.io/en/latest/"
