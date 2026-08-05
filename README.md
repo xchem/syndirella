@@ -38,11 +38,13 @@ conda install -c conda-forge c-compiler cxx-compiler
 pip install --no-build-isolation cgrtools
 ```
 
-### Install with [HIPPO](https://github.com/mwinokan/HIPPO) (optional)
+### Install with [HIPPO](https://github.com/xchem/HIPPO) (optional)
 
 ```bash
-pip install aizynthfinder --no-deps # HIPPO requires `rdkit>=2024.9.6`; AiZynthFinder declares `rdkit<2024`. Install in this order so pip does not pull AiZynthFinder’s RDKit
 pip install syndirella[hippo]
+python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
+pip install aizynthfinder reaction-utils --no-deps # AiZynthFinder and reaction-utils declare `numpy = "<2.0.0"` and `rdkit = "^2023.9.1"` which are uncompatible with HIPPO. Install with `--no-deps` so pip does not pull the wrong NumPy and RDKit versions.
+pip install tqdm paretoset networkx rdchiral wrapt wrapt_timeout_decorator xxhash swifter apted onnxruntime tables
 conda install -c conda-forge chemicalite
 ```
 See the [HIPPO documentation](https://hippo-docs.winokan.com) for full setup and version compatibility.

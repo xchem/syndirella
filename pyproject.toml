@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools<81", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -19,7 +19,7 @@ authors = [
 ]
 description = "Synthetically Driven Elaborations"
 readme = "README.md"
-requires-python = ">=3.10,<3.11"
+requires-python = ">=3.10,<3.14"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -28,7 +28,8 @@ classifiers = [
 dependencies = [
     "rdkit",
     "jupyter",
-    "numpy<2",
+    "numpy<=2.4",
+    "setuptools<81",
     "glob2",
     "requests",
     "pillow",
