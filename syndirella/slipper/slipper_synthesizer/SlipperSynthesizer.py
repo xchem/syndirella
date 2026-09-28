@@ -9,7 +9,7 @@ import os
 from typing import (List, Dict, Tuple)
 
 import pandas as pd
-from rdkit import DataStructs
+from rdkit import Chem, DataStructs
 from rdkit.Chem import rdFMCS
 from rdkit.Chem.EnumerateStereoisomers import EnumerateStereoisomers, StereoEnumerationOptions
 
@@ -159,13 +159,37 @@ class SlipperSynthesizer:
             -> pd.DataFrame:
         """
         This function is used to filter the analogues of reactants dataframes to make sure each analogue contains the
-        SMARTS pattern of the original reactant. If the SMARTS pattern of the other reactant is found as well, it is flagged.
+        SMARTS pattern of the original reactant. If the SMARTS pattern of the other reactant is found as well, it is
+        flagged -- unless the scaffold's own reactant for this role already exhibits that same ambiguity, in which
+        case it is inherent to the design rather than a new issue introduced by elaboration. Analogues that match
+        their own reactant SMARTS more times than the scaffold's own reactant did are flagged (for chemist review,
+        not exclusion) as having introduced extra reaction centres.
         """
         self.logger.info('Filtering analogues of reactants on SMARTS...')
         orig_df = df.copy()
-        # add flag to rows with both 'r1' and 'r2' true
-        df.loc[df[analogue_columns[0]] & df[
-            analogue_columns[1]], 'flag'] = 'selectivity_issue_contains_reaction_atoms_of_both_reactants'
+
+        smarts_index: int = int(reactant_prefix[-1])
+        scaffold_reactant, _, scaffold_reactant_smarts = (
+            self.library.reaction.matched_smarts_index_to_reactant[smarts_index])
+
+        # Item A: if the scaffold's own reactant for this role already matches both reactant SMARTS roles, that
+        # ambiguity is inherent to the design, not a new selectivity issue introduced by elaboration.
+        if self._reactant_matches_both_roles(scaffold_reactant, scaffold_reactant_smarts):
+            self.logger.info(
+                f"Scaffold's own {reactant_prefix} reactant already matches both reactant SMARTS roles; not "
+                f"flagging elaborations of {reactant_prefix} for "
+                f"selectivity_issue_contains_reaction_atoms_of_both_reactants.")
+        else:
+            both_roles_mask = df[analogue_columns[0]] & df[analogue_columns[1]]
+            self._append_flag(df, both_roles_mask, 'selectivity_issue_contains_reaction_atoms_of_both_reactants')
+
+        # Item B: flag (informational only, does not exclude) analogues that introduce more reaction centres than
+        # the scaffold's own reactant had for this role, so a chemist can review whether protecting groups are needed.
+        scaffold_num_matches = fairy.count_smarts_matches(scaffold_reactant, Chem.MolFromSmarts(scaffold_reactant_smarts))
+        num_matches_col = f'{analogue_columns[0]}_num_matches'
+        more_centres_mask = df[num_matches_col] > scaffold_num_matches
+        self._append_flag(df, more_centres_mask, 'more_reaction_centres_added')
+
         # only keep rows with original analogue_prefix true
         orig_r_column = [col for col in analogue_columns if reactant_prefix in col][0]
         df = df[df[orig_r_column]]
@@ -179,6 +203,27 @@ class SlipperSynthesizer:
                               route_uuid=self.route_uuid,
                               mol=self.library.reaction.scaffold)
         return df
+
+    def _reactant_matches_both_roles(self, reactant: Chem.Mol, reactant_smarts: str) -> bool:
+        """
+        Check whether a reactant (e.g. the scaffold's own reactant for a role) matches both its own reactant
+        SMARTS role and the other reactant's SMARTS role for the current reaction. Reuses
+        Library.check_analogue_contains_other_reactant_smarts_pattern for a single molecule.
+        """
+        if len(self.library.reaction.matched_smarts_to_reactant) < 2:
+            return False  # mono-molecular reaction: no "other reactant" role to be ambiguous with
+        contains_other, _ = self.library.check_analogue_contains_other_reactant_smarts_pattern(
+            [reactant], reactant_smarts)
+        return contains_other[0]
+
+    def _append_flag(self, df: pd.DataFrame, mask: pd.Series, flag_name: str) -> None:
+        """Append flag_name to the (list-valued) 'flag' column for rows selected by mask."""
+        if 'flag' not in df.columns:
+            df['flag'] = None
+        if not mask.any():
+            return
+        df.loc[mask, 'flag'] = df.loc[mask, 'flag'].apply(
+            lambda existing: self._flags_to_list(existing) + [flag_name])
 
     def filter_analogues_by_size(self):
         """
@@ -254,11 +299,9 @@ class SlipperSynthesizer:
 
     # Combine 'flag' columns
     def combine_flags(self, row) -> Tuple[str] | None:
-        flags = []
-        if pd.notna(row['flag_x']):
-            flags.append(row['flag_x'])
-        if pd.notna(row['flag_y']):
-            flags.append(row['flag_y'])
+        # each side's 'flag' may itself hold more than one flag (e.g. both a selectivity issue and
+        # more_reaction_centres_added), so normalize via _flags_to_list rather than assuming a scalar.
+        flags = self._flags_to_list(row.get('flag_x')) + self._flags_to_list(row.get('flag_y'))
         flags = tuple(flags)  # make sure it's hashable
         return flags if flags else None
 

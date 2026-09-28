@@ -21,9 +21,14 @@ This guide will walk you through an example to run Syndirella's pipeline through
 
    conda create -n syndirella python=3.10
    conda activate syndirella
-   pip install syndirella
+   pip install xchem-syndirella
    pip install aizynthfinder
    python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
+
+.. note::
+
+   To run from a local checkout instead (development), see :ref:`installing-from-a-checkout-development` in
+   the User Guide. Do not install both the PyPI package and an editable checkout in the same environment.
 
 **Note:** If `cgrtools` installation fails, try running:
 

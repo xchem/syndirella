@@ -22,7 +22,7 @@ Syndirella (Synthesis Directed Elaborations) is a tool for generating and scorin
 ```bash
 conda create -n syndirella python=3.10
 conda activate syndirella
-pip install syndirella
+pip install xchem-syndirella
 pip install aizynthfinder
 python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
 ```
@@ -41,13 +41,41 @@ pip install --no-build-isolation cgrtools
 ### Install with [HIPPO](https://github.com/xchem/HIPPO) (optional)
 
 ```bash
-pip install syndirella[hippo]
+pip install xchem-syndirella[hippo]
 python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
 pip install aizynthfinder reaction-utils --no-deps # AiZynthFinder and reaction-utils declare `numpy = "<2.0.0"` and `rdkit = "^2023.9.1"` which are uncompatible with HIPPO. Install with `--no-deps` so pip does not pull the wrong NumPy and RDKit versions.
 pip install tqdm paretoset networkx rdchiral wrapt wrapt_timeout_decorator xxhash swifter apted onnxruntime tables
 conda install -c conda-forge chemicalite
 ```
 See the [HIPPO documentation](https://hippo-docs.winokan.com) for full setup and version compatibility.
+
+### Development install (from a checkout)
+
+To run Syndirella from a local, possibly-modified checkout instead of the PyPI release:
+
+```bash
+conda create -n syndirella-dev python=3.10
+conda activate syndirella-dev
+git clone https://github.com/xchem/syndirella.git
+cd syndirella
+pip install -e .
+pip install aizynthfinder
+python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
+```
+
+**Do not install both `xchem-syndirella` (PyPI) and an editable checkout (`pip install -e .`) in the same
+environment.** Both provide the same `syndirella` import name and the same `syndirella` CLI command; whichever
+was installed second does not cleanly replace the first, and Python's import resolution can end up silently
+picking one over the other, including a stale one, without any error. Use a separate environment for
+day-to-day/documented use (`pip install xchem-syndirella`) versus development from a checkout
+(`pip install -e .`), and never mix the two in one environment. If you switch a given environment from one mode
+to the other, uninstall first: `pip uninstall xchem-syndirella`.
+
+To check which install is actually active in an environment:
+```bash
+pip show xchem-syndirella   # "Editable project location" is shown only for a checkout install
+python -c 'import syndirella; print(syndirella.__file__)'
+```
 
 ### Basic Usage
 

@@ -38,6 +38,13 @@ def load_substructure_to_include() -> Dict[str, str]:
         return json.load(f)
 
 
+def count_smarts_matches(mol: Chem.Mol, smarts_mol: Chem.Mol) -> int:
+    """
+    Count how many times a SMARTS pattern matches a molecule.
+    """
+    return len(mol.GetSubstructMatches(smarts_mol))
+
+
 def detect_protecting_groups(mol: Chem.Mol, pg_smarts: Dict[str, str]) -> List[str]:
     """
     Check if a molecule contains any protecting groups defined in pg_smarts.
