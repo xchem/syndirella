@@ -264,8 +264,8 @@ class Library:
         dictionary of boolean values and the number of matches.
         """
         self.logger.info('Checking if analogues contain SMARTS pattern of original reactant...')
-        matching = [bool(analogue.GetSubstructMatches(reactant_smarts_mol)) for analogue in analogues_mols]
-        num = [len(analogue.GetSubstructMatches(reactant_smarts_mol)) for analogue in analogues_mols]
+        num = [fairy.count_smarts_matches(analogue, reactant_smarts_mol) for analogue in analogues_mols]
+        matching = [n > 0 for n in num]
         if len(matching) != len(analogues_mols):
             self.logger.error("Problem with finding matches.")
             raise SMARTSError(message="Problem with finding SMARTS matches to analogues.",
