@@ -32,7 +32,7 @@ class TestAdditionalRouteGeneration(unittest.TestCase):
         self.reactants = [('CCOC(=O)Cc1cncc(N)c1', 'CC(=O)Cl')]
         self.reaction_names = ['Amide_Schotten-Baumann_with_amine']
         self.num_steps = 1
-        self.output_dir = '/Users/kate_fieseler/PycharmProjects/syndirella/syndirella/tests/additional_route'
+        self.output_dir = handle_file_path('outputs/test_additional_routes/additional_route')
         self.filter = False
         self.id = generate_inchi_ID(self.product)
         self.elab_single_reactant = False
@@ -55,7 +55,7 @@ class TestElabSingleReactant(unittest.TestCase):
         self.reactants = [('CCOC(=O)Cc1cncc(N)c1', 'CC(=O)Cl')]
         self.reaction_names = ['Amide_Schotten-Baumann_with_amine']
         self.num_steps = 1
-        self.output_dir = '/Users/kate_fieseler/PycharmProjects/syndirella/syndirella/tests/additional_route'
+        self.output_dir = handle_file_path('outputs/test_additional_routes/elab_single_reactant')
         self.filter = False
         self.id = generate_inchi_ID(self.product)
         self.elab_single_reactant = True  ###
@@ -103,7 +103,7 @@ class TestAdditionalRouteandSingleElab(unittest.TestCase):
         self.reactants = [('CCOC(=O)Cc1cncc(N)c1', 'CC(=O)Cl')]
         self.reaction_names = ['Amide_Schotten-Baumann_with_amine']
         self.num_steps = 1
-        self.output_dir = '/Users/kate_fieseler/PycharmProjects/syndirella/syndirella/tests/additional_route'
+        self.output_dir = handle_file_path('outputs/test_additional_routes/additional_route_and_single_elab')
         self.filter = False
         self.id = generate_inchi_ID(self.product)
         self.elab_single_reactant = True  ###
