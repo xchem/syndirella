@@ -376,10 +376,11 @@ class TestArthorIntegration(unittest.TestCase):
     def test_cli_validation_arthor(self):
         """Test that CLI validation works correctly for Arthor."""
         from syndirella.cli import validate_api_credentials
-        
-        # Test with arthor as db_search_tool
+
+        # Test with arthor as db_search_tool and aizynthfinder as retro_tool, so no
+        # Manifold credentials are required (Arthor only needs ARTHOR_API_URL, which is optional).
         settings = {
-            'retro_tool': 'manifold',
+            'retro_tool': 'aizynthfinder',
             'db_search_tool': 'arthor'
         }
         
