@@ -383,9 +383,15 @@ def process_row(row: pd.Series, config: PipelineConfig):
     )
 
     hits: List[str] = check_inputs.get_exact_hit_names(
-        row=row, 
+        row=row,
         hits_path=config.hits_path,
     )
+
+    # Always create the scaffold's output directory up front, so that a scaffold has a directory to
+    # inspect even when it fails before any downstream step (e.g. scaffold placement) gets a chance to
+    # create one itself.
+    inchi_id: str = fairy.generate_inchi_ID(row['smiles'], isomeric=False)
+    os.makedirs(os.path.join(config.output_dir, inchi_id), exist_ok=True)
 
     try:
         if config.manual_routes:

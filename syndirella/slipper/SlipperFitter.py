@@ -96,10 +96,12 @@ class SlipperFitter:
         id = fairy.generate_inchi_ID(Chem.MolToSmiles(scaffold, isomericSmiles=False))
         output_path: str = os.path.join(self.output_dir, f'{id}-scaffold-check')
         lab: Laboratory = self.setup_Fragmenstein(output_path)
+        last_placements_df: pd.DataFrame | None = None
         for attempt in range(1, scaffold_place_num + 1):
             scaffold_placed: Chem.Mol
             placements_df: pd.DataFrame
             scaffold_placed, placements_df = self._place_scaffold(lab, input_df)
+            last_placements_df = placements_df
             if scaffold_placed is not None:
                 paths = [os.path.join(output_path, 'output', scaffold_name, f'{scaffold_name}.minimised.mol'),
                          os.path.join(output_path, scaffold_name,
@@ -115,7 +117,7 @@ class SlipperFitter:
                 geometries: Dict = intra_geometry.check_geometry(scaffold_placed,
                                                                  threshold_clash=0.4)  # increasing threshold for internal clash
                 flat_results: Dict = flatness.check_flatness(scaffold_placed)
-                
+
                 if self._check_intra_geom_flatness_results(geometries=geometries, flat_results=flat_results):
                     self.logger.info(f'Scaffold minimised and passed intramolecular checks.')
                     return (paths[0] if path_exists[0] else paths[1], placements_df)
@@ -126,7 +128,9 @@ class SlipperFitter:
                     return (None, placements_df)
             else:
                 self.logger.info(f'Scaffold could not be minimised. Attempt {attempt} of {scaffold_place_num}.')
-        return (None, None)
+        # Every attempt failed to minimise at all. Still return the last placements_df (if any) so the
+        # failure is recorded in fragmenstein_placements.csv instead of leaving no trace of the attempt.
+        return (None, last_placements_df)
 
     def _check_intra_geom_flatness_results(self,
                                            geometries: Dict,
