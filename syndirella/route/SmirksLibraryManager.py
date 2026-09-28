@@ -11,7 +11,7 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Any
 
 from syndirella.utils.classifier import get_fp, classify_reaction, calc_cosine_similarity, calc_jaccard_similarity
-from syndirella.utils.template_loader import load_uspto_lookup
+from syndirella.utils.template_loader import load_uspto_lookup, _template_loader
 
 
 class SmirksLibraryManager:
@@ -62,9 +62,11 @@ class SmirksLibraryManager:
                     'parent': None
                 }
 
-        # Load USPTO template lookup using template loader
+        # Load USPTO template lookup using template loader, scoped to this instance's
+        # own uspto_lookup_path so a manager built against a non-default (e.g. test)
+        # SMIRKS library never reads or writes the real package's shared cache.
         try:
-            self.uspto_lookup = load_uspto_lookup()
+            self.uspto_lookup = load_uspto_lookup(self._uspto_gz_path())
             self.logger.info("Loaded USPTO lookup from compressed file")
         except Exception as e:
             self.uspto_lookup = {}
@@ -72,6 +74,15 @@ class SmirksLibraryManager:
 
         self.logger.info(f"Loaded {len(self.all_reactions)} total reactions")
         self.logger.info(f"Loaded USPTO mappings for {len(self.uspto_lookup)} template codes")
+
+    def _uspto_gz_path(self) -> str:
+        """Resolve this instance's uspto_lookup_path to its compressed (.json.gz) sibling."""
+        path = self.uspto_lookup_path
+        if path.endswith('.gz'):
+            return path
+        if path.endswith('.json'):
+            return path[:-len('.json')] + '.json.gz'
+        return path + '.json.gz'
 
     def reload_libraries(self):
         """Reload libraries from disk (useful for development/testing)."""
@@ -453,14 +464,15 @@ class SmirksLibraryManager:
         
         # Save updated USPTO data to compressed file
         import gzip
-        compressed_path = self.uspto_lookup_path.replace('.json', '.json.gz')
+        compressed_path = self._uspto_gz_path()
         with gzip.open(compressed_path, 'wt', encoding='utf-8') as f:
             json.dump(self.uspto_lookup, f, indent=2)
         self.logger.info(f"Updated USPTO data saved to compressed file: {compressed_path}")
-        
-        # Also update the cache
-        from syndirella.utils.template_loader import _template_loader
-        cache_path = _template_loader.cache_dir / "uspto_template_lookup.json"
+
+        # Also update the decompression cache for this instance's own uspto_lookup_path,
+        # scoped by source path so this never touches another manager's (e.g. the real
+        # package's) cache entry.
+        cache_path = _template_loader.get_cache_path(compressed_path)
         with open(cache_path, 'w') as f:
             json.dump(self.uspto_lookup, f, indent=2)
         self.logger.info(f"Updated USPTO cache at: {cache_path}")
