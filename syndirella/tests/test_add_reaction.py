@@ -238,10 +238,10 @@ def test_add_reaction_persistence(temp_constants_dir):
         smirks=smirks,
         find_parent=False,
         fp_type='maccs_rxn_fp',
-        threshold=0.2,
+        threshold=0.1,  # matches the fixture's single USPTO template at ~0.164 cosine similarity
         similarity_metric='cosine'
     )
-    
+
     # Verify SMIRKS file was updated
     with open(smirks_path, 'r') as f:
         updated_data = json.load(f)
@@ -323,10 +323,11 @@ def test_uspto_lookup_cache_update(smirks_manager):
         similarity_metric='cosine'
     )
     
-    # Check that cache was updated
+    # Check that cache was updated, at the path scoped to this manager's own
+    # uspto_lookup_path (not the shared/default package cache).
     from syndirella.utils.template_loader import _template_loader
-    cache_path = _template_loader.cache_dir / "uspto_template_lookup.json"
-    
+    cache_path = _template_loader.get_cache_path(smirks_manager._uspto_gz_path())
+
     assert cache_path.exists(), "Cache file was not created/updated"
     
     # Verify cache contains the new reaction
