@@ -125,10 +125,10 @@ END"""
     def test_get_exact_hit_names(self):
         """Test exact hit names retrieval."""
         row = pd.Series({
-            'hit1': 'Ax0556a',
-            'hit2': 'Ax0450a'
+            'hit1': 'A71EV2A-x0556_A_147_1_A71EV2A-x0526+A+147+1',
+            'hit2': 'A71EV2A-x0450_A_201_1_A71EV2A-x0526+A+147+1'
         })
-        
+
         result = check_inputs.get_exact_hit_names(row, self.hits_path)
         self.assertIsInstance(result, list)
         self.assertGreater(len(result), 0)
@@ -137,7 +137,7 @@ END"""
         """Test exact hit names retrieval with invalid hit name."""
         row = pd.Series({
             'hit1': 'InvalidHitName',
-            'hit2': 'Ax0450a'
+            'hit2': 'A71EV2A-x0450_A_201_1_A71EV2A-x0526+A+147+1'
         })
         
         with self.assertRaises(ValueError) as context:
