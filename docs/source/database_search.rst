@@ -94,7 +94,7 @@ HIPPO requires ``rdkit>=2024.9.6``; AiZynthFinder declares ``rdkit<2024``. Insta
 .. code-block:: bash
 
     pip install aizynthfinder --no-deps
-    pip install syndirella[hippo]
+    pip install xchem-syndirella[hippo]
     conda install -c conda-forge chemicalite
 
 See the `HIPPO documentation <https://hippo-docs.winokan.com>`_ for full setup and version compatibility. To create a minimal example database (e.g. at ``~/CursorProjects/HIPPO/reference_db.sqlite``), run ``python scripts/create_hippo_example_db.py [OUTPUT_DIR]``.

@@ -14,7 +14,7 @@ On Mac OS and Linux you can install from PyPI using Conda.
 
     conda create -n syndirella python=3.10
     conda activate syndirella
-    pip install syndirella
+    pip install xchem-syndirella
     pip install aizynthfinder
     python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
 
@@ -35,6 +35,38 @@ On Mac OS and Linux you can install from PyPI using Conda.
 .. attention::
 
     Installation and usage have not been tested on Windows OS.
+
+.. _installing-from-a-checkout-development:
+
+Installing from a checkout (development)
+-----------------------------------------
+
+To run Syndirella from a local, possibly-modified checkout instead of the PyPI release:
+
+.. code-block:: bash
+
+    conda create -n syndirella-dev python=3.10
+    conda activate syndirella-dev
+    git clone https://github.com/xchem/syndirella.git
+    cd syndirella
+    pip install -e .
+    pip install aizynthfinder
+    python -c 'import pyrosetta_installer; pyrosetta_installer.install_pyrosetta()'  # run once, for Fragmenstein
+
+.. warning::
+
+    Do not install both ``xchem-syndirella`` (PyPI) and an editable checkout (``pip install -e .``) in the
+    same environment. Both provide the same ``syndirella`` import name and CLI command, and Python's import
+    resolution can silently pick one over the other (including a stale one) if both are present. Use a
+    separate environment for each mode, and if you switch a given environment from one mode to the other,
+    uninstall first with ``pip uninstall xchem-syndirella``.
+
+    To check which install is active:
+
+    .. code-block:: bash
+
+        pip show xchem-syndirella   # "Editable project location" is shown only for a checkout install
+        python -c 'import syndirella; print(syndirella.__file__)'
 
 2. Setup AiZynthFinder:
 -------------------------------------
